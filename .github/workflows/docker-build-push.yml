@@ -22,4 +22,16 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/visit-counter:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/visit-counter:${{ github.sha }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to kind cluster
+        run: |
+          kubectl set image deployment/visit-counter visit-counter=${{ secrets.DOCKERHUB_USERNAME }}/visit-counter:${{ github.sha }}
+          kubectl rollout status deployment/visit-counter
