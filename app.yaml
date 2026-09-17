@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: visit-counter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: visit-counter
+  template:
+    metadata:
+      labels:
+        app: visit-counter
+    spec:
+      containers:
+        - name: visit-counter
+          image: basicjunior/visit-counter:v2
+          ports:
+            - containerPort: 5000
+          env:
+            - name: DB_HOST
+              value: db
+            - name: DB_NAME
+              value: visits_db
+            - name: DB_USER
+              value: postgres
+            - name: DB_PASSWORD
+              value: postgres
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: visit-counter
+spec:
+  type: NodePort
+  selector:
+    app: visit-counter
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30080
